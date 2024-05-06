@@ -1,8 +1,12 @@
 ## Database configuration
 spring.datasource.url=jdbc:postgresql://localhost:5432/springbootdb
+
 spring.datasource.username=postgres
+
 spring.datasource.password=postgres@123
+
 spring.datasource.driver-class-name=org.postgresql.Driver
+
 
 ##  Running
 Run as a standard spring boot application. Application can be triggered using postman.
