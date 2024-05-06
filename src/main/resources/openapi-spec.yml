@@ -1,0 +1,269 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: "Recipe API for CERBA assignment"
+paths:
+  /recipes:
+    get:
+      summary: "fetch recipes"
+      description: "returns the recipes by page and sorted by name. Recipes are returned without an ingredient list"
+      operationId: getRecipes
+      responses:
+        '200':
+          description: "A list of recipes"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recipe'
+    post:
+      summary: "create a new recipe"
+      description: "adds a new recipe"
+      operationId: createRecipe
+      requestBody:
+        description: "add a new recipe"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BareRecipe'
+      responses:
+        '200':
+          description: "Returns the new recipe with id"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+  /recipes/{uuid}:
+    get:
+      summary: "returns a full recipe based on its ID"
+      description: "returns a full recipe based on a single ID (UUID)"
+      operationId: getRecipe
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the single recipe to fetch"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "full recipe including ingredient list"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullRecipe'
+        '404':
+          description: A recipe with the specified ID was not found.
+    delete:
+      summary: "deletes a full recipe based on its ID"
+      description: "deletes a full recipe, including all of its ingredients, based on a single ID (UUID)"
+      operationId: deleteRecipe
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the single recipe to delete"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "returned when delete recipe was successful"
+    put:
+      summary: "modify a recipe based on its ID"
+      description: "modify recipe based on a single ID (UUID)"
+      operationId: updateRecipe
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the single recipe to modify"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: "Update existing recipe"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BareRecipe'
+      responses:
+        '200':
+          description: "Returns the updated recipe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+        '404':
+          description: A recipe with the specified ID was not found.
+  /ingredients:
+    post:
+      summary: "add a new ingredient to a recipe"
+      description: "adds a new ingredient to a recipe"
+      operationId: addIngredient
+      requestBody:
+        description: "add a new ingredient to a recipe"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BareIngredient'
+      responses:
+        '200':
+          description: "Returns the new ingredient with id"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+  /ingredients/{uuid}:
+    get:
+      summary: "returns an ingredient based on its ID"
+      description: "returns a ingredient based on a single ID (UUID)"
+      operationId: getIngredient
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the single ingredient to fetch"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "full recipe including ingredient list"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '404':
+          description: A recipe with the specified ID was not found.
+    delete:
+      summary: "remove an ingredient based on its ID"
+      description: "deletes an ingredient from a recipe based on a single ID (UUID)"
+      operationId: deleteIngredient
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the single ingredient to delete"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "returned when delete ingredient was successful"
+    put:
+      summary: "modify an ingredient based on its UUID"
+      description: "modify existing ingredient from a recipe based on its UUID"
+      operationId: updateIngredient
+      parameters:
+        - name: uuid
+          in: path
+          description: "UUID of the ingredient to update"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: "Update existing ingredient"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseIngredient'
+      responses:
+        '200':
+          description: "Returns the updated recipe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '404':
+          description: A recipe with the specified ID was not found.
+components:
+  schemas:
+    BareRecipe:
+      type: object
+      description: "bare recipe without an ingredient list and without id"
+      properties:
+        name:
+          type: string
+          example: "Belgian Stew"
+          description: "Provide a meaningful recipe name"
+        description:
+          type: string
+          description: "A short description for the recipe"
+          example: "A classic belgian beef stew with french fries"
+        cookingInstruction:
+          type: string
+          description: "Contains the full recipe"
+          example: "Contains the full recipe"
+      required:
+        - name
+        - description
+        - cookingInstruction
+    Recipe:
+      type: object
+      description: "recipe without an ingredient list"
+      allOf:
+        - $ref: '#/components/schemas/BareRecipe'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id
+    FullRecipe:
+      description: "recipe with ingredient list"
+      allOf:
+        - $ref: '#/components/schemas/Recipe'
+        - type: object
+          properties:
+            ingredients:
+              type: array
+              items:
+                $ref: '#/components/schemas/Ingredient'
+    BaseIngredient:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "The name of the ingredient"
+          example: "Cubed chuck roast"
+        quantity:
+          type: string
+          description: "any specifiction of quantity: 2 oz, 2 cups, 150ml, etc"
+          example: "2 kg"
+      required:
+        - name
+        - quantity
+    BareIngredient:
+      type: object
+      description: "ingredient with recipe_id"
+      allOf:
+        - $ref: '#/components/schemas/BaseIngredient'
+        - type: object
+          properties:
+            recipe_id:
+              type: string
+              format: uuid
+              description: "A link to the recipe using the recipe's UUID (ID). An ingredient can never exist without a recipe"
+          required:
+            - recipe_id
+    Ingredient:
+      type: object
+      description: "ingredient with id"
+      allOf:
+        - $ref: '#/components/schemas/BareIngredient'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id
